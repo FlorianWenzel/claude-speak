@@ -107,7 +107,7 @@ def draw(stdscr, state, selected, ana):
 
     if state is None:
         put(0, 0, "claude-speak", bold)
-        put(2, 0, "daemon not running (it starts with the next response)", dim)
+        put(2, 0, "waiting for daemon… (starting it; the model load takes a few seconds)", dim)
         put(4, 0, "[q] quit", dim)
         return []
 
@@ -258,4 +258,15 @@ def _main(stdscr):
 
 
 def run():
-    curses.wrapper(_main)
+    from . import client
+
+    # start the daemon if it is not up; remember that, so quitting the TUI
+    # only stops a daemon it started itself, never one the hooks were using
+    started_daemon = request({"cmd": "ping"}) is None
+    if started_daemon:
+        client.spawn_daemon()
+    try:
+        curses.wrapper(_main)
+    finally:
+        if started_daemon:
+            request({"cmd": "quit"})

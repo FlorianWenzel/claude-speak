@@ -50,7 +50,7 @@ With [uv](https://docs.astral.sh/uv/) (`brew install uv` if you don't have it):
 
 ```sh
 # latest release:
-uv tool install https://github.com/FlorianWenzel/claude-speak/releases/latest/download/claude_speak-0.1.3-py3-none-any.whl
+uv tool install https://github.com/FlorianWenzel/claude-speak/releases/latest/download/claude_speak-0.1.4-py3-none-any.whl
 # or straight from git (main):
 uv tool install git+https://github.com/FlorianWenzel/claude-speak
 ```
@@ -89,7 +89,11 @@ claude-speak        # or: claude-speak tui
 | `p` | pause / resume speech |
 | `m` | play / pause Spotify |
 | `n` / `N` | Spotify next / previous track |
-| `q` | quit the TUI (speech keeps running) |
+| `q` | quit the TUI |
+
+Opening the TUI starts the daemon if it is not running. Quitting stops the
+daemon only if the TUI started it; a daemon that was already serving hooks
+keeps running (speech continues after `q`).
 
 ## Other commands
 
