@@ -1,0 +1,34 @@
+[project]
+name = "claude-speak"
+version = "0.1.0"
+description = "Read Claude Code responses aloud with local Kokoro TTS on macOS: message queue, terminal UI with spectrum analyzer, seek/speed controls, and Spotify ducking."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.11"
+authors = [{ name = "Florian Wenzel", email = "florian.wenzel@mybits.de" }]
+keywords = ["claude-code", "tts", "kokoro", "mlx", "macos", "text-to-speech"]
+classifiers = [
+    "Environment :: Console :: Curses",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Topic :: Multimedia :: Sound/Audio :: Speech",
+]
+dependencies = [
+    "mlx-audio>=0.5.0",
+    "audiotsm>=0.1.2",
+    "numpy>=1.26",
+    "sounddevice>=0.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/FlorianWenzel/claude-speak"
+
+[project.scripts]
+claude-speak = "claude_speak.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/claude_speak"]
