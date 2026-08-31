@@ -1,6 +1,6 @@
 [project]
 name = "claude-speak"
-version = "0.1.2"
+version = "0.1.3"
 description = "Read Claude Code responses aloud with local Kokoro TTS on macOS: message queue, terminal UI with spectrum analyzer, seek/speed controls, and Spotify ducking."
 readme = "README.md"
 license = "MIT"
@@ -17,6 +17,11 @@ dependencies = [
     "mlx-audio>=0.5.0",
     "audiotsm>=0.1.2",
     "misaki[en]>=0.9",
+    # misaki's English G2P loads this spaCy model at generation time; its own
+    # auto-download can land in the wrong environment, so pin it as a real
+    # dependency. NOTE: direct URL deps are fine for uv/pipx installs but not
+    # allowed on PyPI; move this behind a runtime download before publishing.
+    "en-core-web-sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
     "numpy>=1.26",
     "sounddevice>=0.5",
 ]
@@ -33,3 +38,7 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/claude_speak"]
+
+[tool.hatch.metadata]
+# for the en_core_web_sm URL dependency
+allow-direct-references = true

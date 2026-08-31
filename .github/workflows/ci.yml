@@ -41,4 +41,4 @@ jobs:
         run: |
           uv venv smoke
           uv pip install --python smoke/bin/python dist/*.whl
-          smoke/bin/python -c "import misaki.en, audiotsm, sounddevice, mlx_audio"
+          smoke/bin/python -c "import misaki.en, audiotsm, sounddevice, mlx_audio, en_core_web_sm"
