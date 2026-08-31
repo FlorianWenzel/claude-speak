@@ -1,6 +1,6 @@
 [project]
 name = "claude-speak"
-version = "0.1.1"
+version = "0.1.2"
 description = "Read Claude Code responses aloud with local Kokoro TTS on macOS: message queue, terminal UI with spectrum analyzer, seek/speed controls, and Spotify ducking."
 readme = "README.md"
 license = "MIT"
@@ -16,6 +16,7 @@ classifiers = [
 dependencies = [
     "mlx-audio>=0.5.0",
     "audiotsm>=0.1.2",
+    "misaki[en]>=0.9",
     "numpy>=1.26",
     "sounddevice>=0.5",
 ]

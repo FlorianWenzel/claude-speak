@@ -35,3 +35,10 @@ jobs:
         run: |
           uv tool install dist/*.whl
           claude-speak --help
+      - name: Verify lazy TTS imports resolve
+        # kokoro pulls these in lazily at generation time, so --help alone
+        # would not catch a missing dependency (misaki bit us once)
+        run: |
+          uv venv smoke
+          uv pip install --python smoke/bin/python dist/*.whl
+          smoke/bin/python -c "import misaki.en, audiotsm, sounddevice, mlx_audio"

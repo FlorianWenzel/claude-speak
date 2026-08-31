@@ -50,7 +50,7 @@ With [uv](https://docs.astral.sh/uv/) (`brew install uv` if you don't have it):
 
 ```sh
 # latest release:
-uv tool install https://github.com/FlorianWenzel/claude-speak/releases/latest/download/claude_speak-0.1.1-py3-none-any.whl
+uv tool install https://github.com/FlorianWenzel/claude-speak/releases/latest/download/claude_speak-0.1.2-py3-none-any.whl
 # or straight from git (main):
 uv tool install git+https://github.com/FlorianWenzel/claude-speak
 ```
