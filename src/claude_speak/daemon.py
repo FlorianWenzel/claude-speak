@@ -228,8 +228,10 @@ class SeekPlayer:
         self.rate = 1.0  # persists across items
         self.generating = False
         self.stream = None
+        self.stream_lock = threading.Lock()
         self.playing = False
         self.device_name = ""
+        self.device_override = ""  # runtime device choice; "" = default/env pin
 
     def refresh_devices(self):
         """Re-scan audio devices. PortAudio snapshots the device list at init,
@@ -243,16 +245,42 @@ class SeekPlayer:
             print(f"device refresh failed: {e}", flush=True)
 
     def _resolve_device(self):
-        if not config.DEVICE:
+        want = self.device_override or config.DEVICE
+        if not want:
             return None
         for i, dev in enumerate(self.sd.query_devices()):
-            if (
-                dev["max_output_channels"] > 0
-                and config.DEVICE.lower() in dev["name"].lower()
-            ):
+            if dev["max_output_channels"] > 0 and want.lower() in dev["name"].lower():
                 return i
-        print(f"no output device matching {config.DEVICE!r}, using default", flush=True)
+        print(f"no output device matching {want!r}, using default", flush=True)
         return None
+
+    def cycle_device(self):
+        """Switch to the next output device (system default first, then every
+        output-capable device). Mid-playback the stream is reopened on the new
+        device and continues from the cursor."""
+        was_playing = self.playing
+        if not was_playing:
+            self.refresh_devices()
+        names = [
+            d["name"]
+            for d in self.sd.query_devices()
+            if d["max_output_channels"] > 0
+        ]
+        options = [""] + names  # "" = system default (or CLAUDE_TTS_DEVICE pin)
+        try:
+            idx = options.index(self.device_override)
+        except ValueError:
+            idx = 0
+        self.device_override = options[(idx + 1) % len(options)]
+        if was_playing:
+            self.stop_stream()
+            try:
+                self.start_stream()
+            except Exception as e:
+                print(f"device switch failed: {e}", flush=True)
+        else:
+            self.device_name = self.device_override or "system default"
+        return self.device_override or "system default"
 
     def _stretch(self, samples, rate):
         if abs(rate - 1.0) < 0.01 or len(samples) < 512:
@@ -364,31 +392,35 @@ class SeekPlayer:
             # underrun while still generating: emit silence, keep the stream
 
     def start_stream(self):
-        device = self._resolve_device()
-        self.stream = self.sd.OutputStream(
-            samplerate=self.sample_rate,
-            channels=1,
-            callback=self._callback,
-            blocksize=2048,
-            device=device,
-        )
-        self.stream.start()
-        self.playing = True
-        try:
-            if device is None:
-                device = self.sd.default.device[1]
-            self.device_name = self.sd.query_devices(device)["name"]
-        except Exception:
-            self.device_name = ""
+        with self.stream_lock:
+            if self.playing:
+                return
+            device = self._resolve_device()
+            self.stream = self.sd.OutputStream(
+                samplerate=self.sample_rate,
+                channels=1,
+                callback=self._callback,
+                blocksize=2048,
+                device=device,
+            )
+            self.stream.start()
+            self.playing = True
+            try:
+                if device is None:
+                    device = self.sd.default.device[1]
+                self.device_name = self.sd.query_devices(device)["name"]
+            except Exception:
+                self.device_name = ""
 
     def stop_stream(self):
-        try:
-            if self.stream:
-                self.stream.stop()
-                self.stream.close()
-        finally:
-            self.stream = None
-            self.playing = False
+        with self.stream_lock:
+            try:
+                if self.stream:
+                    self.stream.stop()
+                    self.stream.close()
+            finally:
+                self.stream = None
+                self.playing = False
 
 
 class Speaker:
@@ -669,6 +701,9 @@ def run():
                 elif cmd == "spotify":
                     ok = speaker.spotify.command(req.get("action", ""))
                     reply(conn, {"ok": ok})
+                elif cmd == "device":
+                    name = speaker.player.cycle_device()
+                    reply(conn, {"ok": True, "device": name})
                 elif cmd == "spectrum":
                     n = min(max(int(req.get("bands", 24)), 8), 64)
                     reply(conn, {"ok": True, "bands": speaker.player.spectrum(n)})

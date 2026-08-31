@@ -168,7 +168,7 @@ def draw(stdscr, state, selected, ana):
     put(
         height - 1,
         0,
-        "[↑↓ enter] play [←→] seek [-+] speed [s] skip [c] clear [p] pause [m] music [n/N] track [q] quit",
+        "[↑↓ enter] play [←→] seek [-+] speed [s] skip [c] clear [p] pause [o] output [m] music [n/N] track [q] quit",
         dim,
     )
     return selectable
@@ -231,6 +231,9 @@ def _main(stdscr):
             last_status = 0
         elif key in (ord("-"), ord("_")):
             request({"cmd": "rate", "delta": -0.1})
+            last_status = 0
+        elif key == ord("o"):
+            request({"cmd": "device"})
             last_status = 0
         elif key == ord("m"):
             request({"cmd": "spotify", "action": "playpause"})
