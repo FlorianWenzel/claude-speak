@@ -50,7 +50,7 @@ With [uv](https://docs.astral.sh/uv/) (`brew install uv` if you don't have it):
 
 ```sh
 # latest release:
-uv tool install https://github.com/FlorianWenzel/claude-speak/releases/latest/download/claude_speak-0.1.0-py3-none-any.whl
+uv tool install https://github.com/FlorianWenzel/claude-speak/releases/latest/download/claude_speak-0.1.1-py3-none-any.whl
 # or straight from git (main):
 uv tool install git+https://github.com/FlorianWenzel/claude-speak
 ```
@@ -114,6 +114,7 @@ your shell profile or the `env` block in `~/.claude/settings.json`):
 | `CLAUDE_TTS_MAX_CHARS` | `6000` | cap per spoken message |
 | `CLAUDE_TTS_SPOTIFY` | `duck` | `duck`, `pause`, or `off` |
 | `CLAUDE_TTS_SPOTIFY_DUCK` | `12` | Spotify volume while speaking |
+| `CLAUDE_TTS_DEVICE` | (system default) | pin the output device by name substring |
 | `CLAUDE_SPEAK_DIR` | `~/.claude-speak` | socket, logs, state |
 
 ## How it works

@@ -229,6 +229,30 @@ class SeekPlayer:
         self.generating = False
         self.stream = None
         self.playing = False
+        self.device_name = ""
+
+    def refresh_devices(self):
+        """Re-scan audio devices. PortAudio snapshots the device list at init,
+        so without this a newly connected default device (bluetooth earbuds,
+        ...) is never picked up and speech keeps going to the old one. Only
+        call while no stream is open."""
+        try:
+            self.sd._terminate()
+            self.sd._initialize()
+        except Exception as e:
+            print(f"device refresh failed: {e}", flush=True)
+
+    def _resolve_device(self):
+        if not config.DEVICE:
+            return None
+        for i, dev in enumerate(self.sd.query_devices()):
+            if (
+                dev["max_output_channels"] > 0
+                and config.DEVICE.lower() in dev["name"].lower()
+            ):
+                return i
+        print(f"no output device matching {config.DEVICE!r}, using default", flush=True)
+        return None
 
     def _stretch(self, samples, rate):
         if abs(rate - 1.0) < 0.01 or len(samples) < 512:
@@ -295,6 +319,7 @@ class SeekPlayer:
                 "duration": len(self.src) / self.sample_rate,
                 "rate": round(self.rate, 2),
                 "generating": self.generating,
+                "device": self.device_name,
             }
 
     def remaining(self):
@@ -339,14 +364,22 @@ class SeekPlayer:
             # underrun while still generating: emit silence, keep the stream
 
     def start_stream(self):
+        device = self._resolve_device()
         self.stream = self.sd.OutputStream(
             samplerate=self.sample_rate,
             channels=1,
             callback=self._callback,
             blocksize=2048,
+            device=device,
         )
         self.stream.start()
         self.playing = True
+        try:
+            if device is None:
+                device = self.sd.default.device[1]
+            self.device_name = self.sd.query_devices(device)["name"]
+        except Exception:
+            self.device_name = ""
 
     def stop_stream(self):
         try:
@@ -491,6 +524,9 @@ class Speaker:
                 item = self.queue.popleft()
                 self.current = item
             if idle:
+                # no stream is open while idle, so this is the safe moment to
+                # pick up audio device changes since the last burst
+                self.player.refresh_devices()
                 self.spotify.duck()
                 idle = False
             self.skip_flag.clear()

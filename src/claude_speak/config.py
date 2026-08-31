@@ -13,6 +13,9 @@ STATE_PATH = RUNTIME_DIR / "spoken.json"  # last spoken message per transcript
 OFF_FLAG = RUNTIME_DIR / "off"  # exists -> hook stays silent
 
 MODEL = os.environ.get("CLAUDE_TTS_MODEL", "mlx-community/Kokoro-82M-bf16")
+# pin the output device by name substring (e.g. "MacBook Pro Speakers");
+# empty = follow the system default
+DEVICE = os.environ.get("CLAUDE_TTS_DEVICE", "")
 VOICE = os.environ.get("CLAUDE_TTS_VOICE", "af_heart")
 SPEED = float(os.environ.get("CLAUDE_TTS_SPEED", "1.1"))
 MAX_CHARS = int(os.environ.get("CLAUDE_TTS_MAX_CHARS", "6000"))

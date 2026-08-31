@@ -114,6 +114,8 @@ def draw(stdscr, state, selected, ana):
     paused = " [PAUSED]" if state["paused"] else ""
     rate = state.get("rate", 1.0)
     header = f"claude-speak{paused}   speed {rate:.1f}x"
+    if state.get("device"):
+        header += f"   out: {state['device']}"
     spotify = state.get("spotify")
     if spotify and spotify.get("track"):
         tag = "ducked" if spotify.get("ducked") else spotify.get("state", "")
