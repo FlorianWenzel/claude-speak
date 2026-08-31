@@ -46,13 +46,21 @@ Everything runs in a small daemon that keeps the model warm in memory
 
 ## Install
 
-With [uv](https://docs.astral.sh/uv/):
+With [uv](https://docs.astral.sh/uv/) (`brew install uv` if you don't have it):
 
 ```sh
-uv tool install claude-speak        # once published to PyPI
-# or straight from git:
+# latest release:
+uv tool install https://github.com/FlorianWenzel/claude-speak/releases/latest/download/claude_speak-0.1.0-py3-none-any.whl
+# or straight from git (main):
 uv tool install git+https://github.com/FlorianWenzel/claude-speak
 ```
+
+Prefer pipx? `pipx install git+https://github.com/FlorianWenzel/claude-speak`
+works the same way. Wheels and sdists for every version are on the
+[releases page](https://github.com/FlorianWenzel/claude-speak/releases).
+
+To update later: `uv tool upgrade claude-speak` (git installs) or re-run the
+install command with the new release URL.
 
 Then register the Stop hook (this edits `~/.claude/settings.json`):
 
@@ -141,6 +149,20 @@ Claude Code ──Stop hook──> claude-speak hook ──unix socket──> da
 - **Spotify not ducking**: check System Settings, Privacy & Security,
   Automation, and allow your terminal/python to control Spotify.
 - Daemon log: `~/.claude-speak/daemon.log`
+
+## Releasing (maintainers)
+
+Tag a version and push it; CI builds the package and creates a GitHub
+release with the wheel and sdist attached:
+
+```sh
+git tag v0.2.0 && git push origin v0.2.0
+```
+
+PyPI publishing is wired up but off by default: add a
+[trusted publisher](https://docs.pypi.org/trusted-publishers/) for this repo
+and the `release.yml` workflow on pypi.org, then set the repository variable
+`PUBLISH_PYPI` to `true`.
 
 ## License
 
