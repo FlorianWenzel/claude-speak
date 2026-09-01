@@ -2,9 +2,11 @@
 
 import curses
 import math
+import signal
 import time
 from datetime import datetime
 
+from . import config
 from .client import request
 
 STATUS_POLL = 0.3
@@ -263,13 +265,23 @@ def _main(stdscr):
 def run():
     from . import client
 
-    # start the daemon if it is not up; remember that, so quitting the TUI
-    # only stops a daemon it started itself, never one the hooks were using
-    started_daemon = request({"cmd": "ping"}) is None
-    if started_daemon:
+    # the TUI is the TTS switch: opening it turns speaking on and makes sure
+    # the daemon runs; leaving it (q, ctrl-c, terminal closed) mutes the hook
+    # and stops the daemon until the next time it is opened
+    config.OFF_FLAG.unlink(missing_ok=True)
+    if request({"cmd": "ping"}) is None:
         client.spawn_daemon()
+
+    def _bail(signum, frame):
+        raise SystemExit(0)
+
+    signal.signal(signal.SIGTERM, _bail)
+    signal.signal(signal.SIGHUP, _bail)
     try:
         curses.wrapper(_main)
+    except KeyboardInterrupt:
+        pass
     finally:
-        if started_daemon:
-            request({"cmd": "quit"})
+        config.ensure_runtime_dir()
+        config.OFF_FLAG.touch()
+        request({"cmd": "quit"})

@@ -1,6 +1,6 @@
 [project]
 name = "claude-speak"
-version = "0.1.5"
+version = "0.1.6"
 description = "Read Claude Code responses aloud with local Kokoro TTS on macOS: message queue, terminal UI with spectrum analyzer, seek/speed controls, and Spotify ducking."
 readme = "README.md"
 license = "MIT"

@@ -50,7 +50,7 @@ With [uv](https://docs.astral.sh/uv/) (`brew install uv` if you don't have it):
 
 ```sh
 # latest release:
-uv tool install https://github.com/FlorianWenzel/claude-speak/releases/latest/download/claude_speak-0.1.5-py3-none-any.whl
+uv tool install https://github.com/FlorianWenzel/claude-speak/releases/latest/download/claude_speak-0.1.6-py3-none-any.whl
 # or straight from git (main):
 uv tool install git+https://github.com/FlorianWenzel/claude-speak
 ```
@@ -92,9 +92,10 @@ claude-speak        # or: claude-speak tui
 | `n` / `N` | Spotify next / previous track |
 | `q` | quit the TUI |
 
-Opening the TUI starts the daemon if it is not running. Quitting stops the
-daemon only if the TUI started it; a daemon that was already serving hooks
-keeps running (speech continues after `q`).
+The TUI is the TTS switch: opening it unmutes and starts the daemon if
+needed; leaving it (`q`, ctrl-c, or closing the terminal) mutes the hook and
+stops the daemon, so nothing is spoken until you open it again. To keep
+speech running without the TUI, use `claude-speak on` instead.
 
 ## Other commands
 
