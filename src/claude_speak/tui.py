@@ -188,6 +188,7 @@ def _main(stdscr):
     selected = 0
     state = None
     last_status = 0.0
+    last_spawn = time.monotonic()
     ana = Analyzer()
 
     while True:
@@ -195,6 +196,13 @@ def _main(stdscr):
         if now - last_status >= STATUS_POLL:
             state = request({"cmd": "status"})
             last_status = now
+            # the TUI is the switch, so keep the daemon alive while open;
+            # respawn if it died (the daemon lock makes double-spawns safe)
+            if state is None and now - last_spawn > 10:
+                from . import client
+
+                client.spawn_daemon()
+                last_spawn = now
 
         _, width = stdscr.getmaxyx()
         n_bands = min(36, max(8, (width - 2) // 2))

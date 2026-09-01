@@ -96,7 +96,7 @@ class Spotify:
 
     def __init__(self):
         self.mode = config.SPOTIFY_MODE
-        self.duck_volume = config.SPOTIFY_DUCK_VOLUME
+        self.duck_level = config.SPOTIFY_DUCK
         self.lock = threading.Lock()
         self.active = False  # we are currently ducking/pausing
         self.prev_volume = None
@@ -171,8 +171,13 @@ class Spotify:
                 self.paused_by_us = True
             else:
                 self.prev_volume = q["volume"]
+                if self.duck_level <= 1:
+                    # relative: keep the music audible under the voice
+                    target = max(3, round(q["volume"] * self.duck_level))
+                else:
+                    target = int(self.duck_level)
                 self._osa(
-                    f'tell application "Spotify" to set sound volume to {self.duck_volume}'
+                    f'tell application "Spotify" to set sound volume to {target}'
                 )
             self.active = True
             self._cache = (0.0, None)

@@ -23,7 +23,9 @@ MAX_CHARS = int(os.environ.get("CLAUDE_TTS_MAX_CHARS", "6000"))
 # Spotify ducking: "duck" lowers the volume while speaking, "pause" pauses
 # the music, "off" disables the integration entirely.
 SPOTIFY_MODE = os.environ.get("CLAUDE_TTS_SPOTIFY", "duck")
-SPOTIFY_DUCK_VOLUME = int(os.environ.get("CLAUDE_TTS_SPOTIFY_DUCK", "12"))
+# <= 1: fraction of the current volume to duck to (0.6 = keep 60%, music
+# stays audible in the background); > 1: absolute Spotify volume (0-100)
+SPOTIFY_DUCK = float(os.environ.get("CLAUDE_TTS_SPOTIFY_DUCK", "0.6"))
 
 MAX_QUEUE = 20
 MAX_HISTORY = 20
