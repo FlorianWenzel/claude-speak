@@ -1,8 +1,9 @@
 """The Claude Code Stop hook: speak the response that just finished.
 
-Reads the hook event JSON from stdin, finds the newest assistant message in
-the session transcript that has not been spoken yet, cleans it up, and sends
-it to the daemon. Registered in ~/.claude/settings.json by
+Reads the hook event JSON from stdin, takes the finished response from its
+`last_assistant_message` field (falling back to the newest unspoken assistant
+message in the transcript on older Claude Code versions), cleans it up, and
+sends it to the daemon. Registered in ~/.claude/settings.json by
 `claude-speak install-hook`.
 """
 
@@ -91,10 +92,13 @@ def run() -> None:
         hook_input = json.load(sys.stdin)
     except json.JSONDecodeError:
         return
-    transcript_path = hook_input.get("transcript_path", "")
-    if not transcript_path:
-        return
-    text = clean_for_speech(fresh_assistant_text(transcript_path))
+    text = hook_input.get("last_assistant_message") or ""
+    if not text:
+        transcript_path = hook_input.get("transcript_path", "")
+        if not transcript_path:
+            return
+        text = fresh_assistant_text(transcript_path)
+    text = clean_for_speech(text)
     if not text:
         return
     client.speak(truncate_at_sentence(text, config.MAX_CHARS))
